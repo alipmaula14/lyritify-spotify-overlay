@@ -75,9 +75,6 @@ Output will be in `release/Lyritify-portable.exe`
 - LRCLIB API
 
 ---
-
-## Notes
-- Spotify must be open and playing for lyrics to sync
 - Works with Spotify on any device (phone, desktop) as long as you're logged in
 - Some songs may not have synced lyrics — LRCLIB coverage depends on the song
 
