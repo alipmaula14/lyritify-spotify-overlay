@@ -1,0 +1,56 @@
+{
+  "name": "lyritify",
+  "version": "1.0.0",
+  "description": "Floating always-on-top Spotify lyrics overlay",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "package": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "com.alif.lyritify",
+    "productName": "Lyritify",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Lyritify-portable.exe"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "electron": "^30.5.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^2.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "allowScripts": {
+    "electron@30.5.1": true,
+    "esbuild@0.21.5": true,
+    "electron-winstaller@5.4.0": true
+  }
+}
