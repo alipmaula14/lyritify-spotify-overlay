@@ -4,6 +4,10 @@ A floating lyrics overlay for Spotify that stays on top of whatever you're doing
 
 ---
 
+Still in development — UI needs some work and there are a few known issues, but the core functionality works. Built this for myself and sharing it for anyone who wants to try it out or contribute.
+
+---
+
 ## Features
 - Real-time synced lyrics from LRCLIB
 - Always-on-top floating window
