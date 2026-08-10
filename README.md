@@ -79,6 +79,3 @@ Output will be in `release/Lyritify-portable.exe`
 - Some songs may not have synced lyrics — LRCLIB coverage depends on the song
 
 ---
-
-## License
-MIT — do whatever you want with it
