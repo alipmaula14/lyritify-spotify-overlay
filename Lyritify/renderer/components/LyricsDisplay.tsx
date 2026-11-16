@@ -48,27 +48,42 @@ export function LyricDisplay({ lyrics, currentIndex, isLoading, hasLyrics, track
     )
   }
 
-  const startIdx = Math.max(0, Math.min(currentIndex - CENTER, lyrics.length - VISIBLE))
-  const visibleLyrics = lyrics.slice(startIdx, startIdx + VISIBLE)
+  // Build a fixed VISIBLE-slot window centered exactly on currentIndex,
+  // using invisible placeholders (not real lines) for slots that fall
+  // before the first or after the last lyric. Clamping/shifting the
+  // window near the start or end of a song — like slicing the array and
+  // relying on justify-content to center the group — makes the active
+  // line land off-center, since there aren't enough real lines to fill
+  // the slots on one side.
+  const slots = Array.from({ length: VISIBLE }, (_, i) => {
+    const idx = currentIndex + (i - CENTER)
+    return idx >= 0 && idx < lyrics.length ? { idx, line: lyrics[idx] } : null
+  })
 
   return (
     <div className="lyrics-window">
-      {visibleLyrics.map((line, i) => {
-        const absoluteIndex = startIdx + i
-        const isActive = absoluteIndex === currentIndex
-        const dist = Math.abs(absoluteIndex - currentIndex)
+      {slots.map((slot, i) => {
+        const offset = i - CENTER
+        const dist = Math.abs(offset)
+        // Match a real line's tier class even for placeholders, so an
+        // empty slot takes up exactly the same height a real line at
+        // that distance would — keeping the active line symmetric
+        // (and therefore centered) regardless of which slots are empty.
+        const tierClass = dist === 0 ? 'active' : dist === 1 ? 'near' : ''
+
+        if (!slot) {
+          return (
+            <div key={`empty-${i}`} className={`lyric-line ${tierClass}`} style={{ visibility: 'hidden' }}>&nbsp;</div>
+          )
+        }
 
         return (
           <div
-            key={absoluteIndex}
-            className={[
-              'lyric-line',
-              isActive ? 'active' : '',
-              dist === 1 ? 'near' : dist > 1 ? 'far' : ''
-            ].join(' ').trim()}
-            onClick={() => onSeek(line.time)}
+            key={slot.idx}
+            className={`lyric-line ${tierClass}`}
+            onClick={() => onSeek(slot.line.time)}
           >
-            {line.text}
+            {slot.line.text}
           </div>
         )
       })}
