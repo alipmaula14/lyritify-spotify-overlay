@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './styles/settings.css'
 
 const FONT_OPTIONS = [
+  'Inter',
   'Segoe UI',
   'Arial',
   'Georgia',
@@ -14,15 +15,27 @@ const FONT_OPTIONS = [
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    windowWidth: 500,
-    windowHeight: 160,
-    fontSize: 15,
-    activeFontSize: 18,
-    fontFamily: 'Segoe UI',
-    activeColor: '#000000',
-    inactiveColor: 'rgba(0,0,0,0.35)',
-    bgColor: '#ffffff',
-    bgOpacity: 0.0
+    windowWidth: 396,
+    windowHeight: 516,
+    fontSize: 13,
+    activeFontSize: 20,
+    fontFamily: 'Inter',
+    activeColor: '#ffffff',
+    inactiveColor: 'rgba(255,255,255,0.4)',
+    bgColor: '#0c0c12',
+    bgOpacity: 0.28,
+    lyricsPanelColor: '#0c0c12',
+    lyricsPanelOpacity: 0.28,
+    lyricsCenterColor: '#1a1a2e',
+    lyricsCenterGradient: 0.4,
+    lyricsPanelRadius: 16,
+    titleColor: '#ffffff',
+    titleSize: 14,
+    artistColor: '#999999',
+    artistSize: 12,
+    buttonColor: '#cccccc',
+    buttonBgColor: '#ffffff',
+    buttonSize: 40
   })
 
   useEffect(() => {
@@ -46,13 +59,13 @@ export default function Settings() {
 
       <div className="settings-group">
         <label>Window Width</label>
-        <input type="number" value={settings.windowWidth} min={200} max={1000}
+        <input type="number" value={settings.windowWidth} min={250} max={1000}
           onChange={e => update('windowWidth', Number(e.target.value))} />
       </div>
 
       <div className="settings-group">
         <label>Window Height</label>
-        <input type="number" value={settings.windowHeight} min={80} max={800}
+        <input type="number" value={settings.windowHeight} min={200} max={800}
           onChange={e => update('windowHeight', Number(e.target.value))} />
       </div>
 
@@ -100,6 +113,78 @@ export default function Settings() {
         <label>Background Transparency ({Math.round(settings.bgOpacity * 100)}%)</label>
         <input type="range" min={0} max={100} value={Math.round(settings.bgOpacity * 100)}
           onChange={e => update('bgOpacity', Number(e.target.value) / 100)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Lyrics Panel Colour</label>
+        <input type="color" value={settings.lyricsPanelColor}
+          onChange={e => update('lyricsPanelColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Lyrics Panel Transparency ({Math.round(settings.lyricsPanelOpacity * 100)}%)</label>
+        <input type="range" min={0} max={100} value={Math.round(settings.lyricsPanelOpacity * 100)}
+          onChange={e => update('lyricsPanelOpacity', Number(e.target.value) / 100)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Lyrics Panel Centre Colour</label>
+        <input type="color" value={settings.lyricsCenterColor}
+          onChange={e => update('lyricsCenterColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Lyrics Panel Centre Gradient ({Math.round(settings.lyricsCenterGradient * 100)}%)</label>
+        <input type="range" min={0} max={100} value={Math.round(settings.lyricsCenterGradient * 100)}
+          onChange={e => update('lyricsCenterGradient', Number(e.target.value) / 100)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Lyrics Panel Top Roundness ({settings.lyricsPanelRadius}px)</label>
+        <input type="range" min={0} max={24} value={settings.lyricsPanelRadius}
+          onChange={e => update('lyricsPanelRadius', Number(e.target.value))} />
+      </div>
+
+      <div className="settings-group">
+        <label>Title Colour</label>
+        <input type="color" value={settings.titleColor}
+          onChange={e => update('titleColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Title Size ({settings.titleSize}px)</label>
+        <input type="range" min={10} max={24} value={settings.titleSize}
+          onChange={e => update('titleSize', Number(e.target.value))} />
+      </div>
+
+      <div className="settings-group">
+        <label>Artist Colour</label>
+        <input type="color" value={settings.artistColor}
+          onChange={e => update('artistColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Artist Size ({settings.artistSize}px)</label>
+        <input type="range" min={9} max={18} value={settings.artistSize}
+          onChange={e => update('artistSize', Number(e.target.value))} />
+      </div>
+
+      <div className="settings-group">
+        <label>Button Colour</label>
+        <input type="color" value={settings.buttonColor}
+          onChange={e => update('buttonColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Play Button Background</label>
+        <input type="color" value={settings.buttonBgColor}
+          onChange={e => update('buttonBgColor', e.target.value)} />
+      </div>
+
+      <div className="settings-group">
+        <label>Button Size ({settings.buttonSize}px)</label>
+        <input type="range" min={32} max={56} value={settings.buttonSize}
+          onChange={e => update('buttonSize', Number(e.target.value))} />
       </div>
 
       <div className="settings-actions">

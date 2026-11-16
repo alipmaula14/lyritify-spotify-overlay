@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -7,69 +9,24 @@
 body {
   background: transparent;
   overflow: hidden;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-family, 'Inter'), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
   user-select: none;
 }
 
-/* Scrollable lyrics area */
-.lyrics-container {
-  height: 100vh;
-  overflow-y: auto;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  scrollbar-width: none;
-}
-
-.lyrics-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* Individual lyric line */
-.lyric-line {
-  font-size: var(--font-size, 15px);
-  font-family: var(--font-family, 'Segoe UI');
-  font-weight: 500;
-  color: var(--inactive-color, rgba(0,0,0,0.35));
-  transition: all 0.3s ease;
-  text-align: center;
-  line-height: 1.5;
-  cursor: default;
-  -webkit-app-region: no-drag;
-}
-
-.lyric-line.active {
-  font-size: var(--active-font-size, 18px);
-  font-weight: 700;
-  color: var(--active-color, #000000);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-.lyric-line.next {
-  color: var(--inactive-color, rgba(0,0,0,0.35));
-  opacity: 0.7;
-}
-
-.lyric-line.past {
-  color: var(--inactive-color, rgba(0,0,0,0.35));
-  opacity: 0.4;
-}
-
-/* State messages */
+/* State messages (nothing playing / loading / no lyrics) */
 .state-message {
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: rgba(0, 0, 0, 0.4);
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
   -webkit-app-region: drag;
 }
 
-/* Track info when no lyrics */
 .track-info {
   display: flex;
   align-items: center;
@@ -85,17 +42,12 @@ body {
 .track-name {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.7);
-}
-
-.track-artist {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .no-lyrics {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* Login screen */
@@ -106,21 +58,21 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.75);
-  border-radius: 12px;
+  background: rgba(12, 12, 18, 0.85);
+  border-radius: 24px;
   -webkit-app-region: drag;
 }
 
 .login-title {
   font-size: 22px;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   letter-spacing: 2px;
 }
 
 .login-sub {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 16px;
 }
 
@@ -141,41 +93,48 @@ body {
   opacity: 0.85;
 }
 
-/* Invisible full-window wrapper — drag handle */
-/* Invisible full-window wrapper — drag handle */
+/* Card — inset from the window edge so the drop shadow below has room
+   to fade out before hitting the window's true rectangular bounds.
+   Without this gap, the shadow gets hard-clipped at the corners and
+   leaves a visible square remnant outside the rounded shape. */
 .app-wrapper {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 12px;
-  background: var(--bg-color, rgba(255, 255, 255, 0.5));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  -webkit-app-region: drag;
-}
-
-/* Inner lyrics area — not draggable, has the visual background */
-.lyrics-inner {
   position: absolute;
-  top: 20px;
-  left: 10px;
-  right: 10px;
-  bottom: 20px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.0);
-  -webkit-app-region: no-drag;
+  inset: 28px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: var(--bg-color, rgba(12, 12, 18, 0.72));
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.06) inset,
+    0 2px 28px rgba(0, 0, 0, 0.5);
+  border: 0.5px solid rgba(255, 255, 255, 0.07);
+  -webkit-app-region: drag;
   overflow: hidden;
 }
 
-/* Controls — hidden by default, shown on hover */
+/* Centre gradient — a soft glow from the middle of the lyrics panel
+   (right behind the active line), fading out to the panel's own
+   background colour at the edges. */
+.accent-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(circle at center, var(--lyrics-center-color, #1a1a2e) 0%, transparent 75%);
+  opacity: var(--lyrics-center-gradient, 0.4);
+}
+
+/* Window controls — top right */
 .controls {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
   display: flex;
   gap: 6px;
-  z-index: 100;
-  opacity: 0;
+  z-index: 20;
+  opacity: 0.2;
   transition: opacity 0.2s ease;
   -webkit-app-region: no-drag;
 }
@@ -185,38 +144,198 @@ body {
 }
 
 .controls button {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  color: rgba(0, 0, 0, 0.6);
-  width: 22px;
-  height: 22px;
+  color: var(--button-color, rgba(255, 255, 255, 0.7));
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  font-size: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   -webkit-app-region: no-drag;
   pointer-events: all;
 }
 
-.controls button {
-  background: rgba(0, 0, 0, 0.12);
-  border: none;
-  color: rgba(0, 0, 0, 0.6);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
+.controls button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+/* Now playing header */
+.now-playing-header {
+  padding: 24px 24px 0;
   -webkit-app-region: no-drag;
 }
 
-.controls button:hover {
-  background: rgba(0, 0, 0, 0.22);
+.now-playing-label {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+
+.track-title {
+  color: var(--title-color, #ffffff);
+  font-size: var(--title-size, 14px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.track-artist {
+  color: var(--artist-color, rgba(255, 255, 255, 0.4));
+  font-size: var(--artist-size, 12px);
+  margin-top: 2px;
+}
+
+/* Lyrics stage — its own distinct panel, but runs edge-to-edge and
+   flows straight down into the player section below with no gap. */
+.lyrics-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin-top: 16px;
+  border-radius: var(--lyrics-radius, 16px) var(--lyrics-radius, 16px) 0 0;
+  background: var(--lyrics-bg-color, rgba(12, 12, 18, 0.72));
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+}
+
+.lyrics-window {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+.lyric-line {
+  font-family: var(--font-family, 'Inter');
+  color: var(--inactive-color, rgba(255, 255, 255, 0.4));
+  font-size: var(--font-size, 13px);
+  font-weight: 300;
+  opacity: 0.18;
+  letter-spacing: 0.01em;
+  text-align: center;
+  line-height: 1.5;
+  padding: 5px 0;
+  cursor: pointer;
+  transition: all 0.5s ease-out;
+}
+
+.lyric-line.near {
+  opacity: 0.45;
+  font-weight: 400;
+  padding: 7px 0;
+}
+
+.lyric-line.active {
+  color: var(--active-color, #ffffff);
+  font-size: var(--active-font-size, 20px);
+  font-weight: 600;
+  opacity: 1;
+  letter-spacing: -0.01em;
+  padding: 10px 0;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Progress bar */
+.progress-section {
+  padding: 4px 24px 0;
+  -webkit-app-region: no-drag;
+}
+
+.progress-track {
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right, rgba(160, 120, 255, 0.85), rgba(200, 160, 255, 0.65));
+  transition: width 0.5s linear;
+}
+
+.progress-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.progress-times span {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Divider */
+.divider {
+  height: 0.5px;
+  margin: 12px 24px 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Playback controls */
+.transport-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 16px 24px;
+  -webkit-app-region: no-drag;
+}
+
+.transport-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--button-size, 40px) * 0.8);
+  height: calc(var(--button-size, 40px) * 0.8);
+  background: transparent;
+  border: none;
+  color: var(--button-color, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.transport-btn:hover {
+  color: #ffffff;
+}
+
+.transport-btn:active {
+  transform: scale(0.9);
+}
+
+.play-pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-size, 40px);
+  height: var(--button-size, 40px);
+  border-radius: 50%;
+  background: var(--button-bg, rgba(255, 255, 255, 0.92));
+  color: #000000;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 16px rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.play-pause-btn:hover {
+  transform: scale(1.05);
+}
+
+.play-pause-btn:active {
+  transform: scale(0.95);
 }

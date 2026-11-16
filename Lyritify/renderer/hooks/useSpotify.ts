@@ -4,7 +4,8 @@ const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string
 const REDIRECT_URI = 'http://127.0.0.1:8888/callback'
 const SCOPES = [
   'user-read-playback-state',
-  'user-read-currently-playing'
+  'user-read-currently-playing',
+  'user-modify-playback-state'
 ].join(' ')
 
 export interface TrackInfo {
@@ -23,6 +24,10 @@ interface SpotifyState {
   track: TrackInfo | null
   error: string | null
   login: () => void
+  togglePlay: () => void
+  skipNext: () => void
+  skipPrevious: () => void
+  seek: (positionMs: number) => void
 }
 
 function generateCodeVerifier(): string {
@@ -175,6 +180,69 @@ export function useSpotify(): SpotifyState {
     }
   }, [isAuthenticated, accessToken, fetchCurrentTrack])
 
+  const controlRequest = useCallback(async (path: string, method: string): Promise<boolean> => {
+    if (!accessToken) return false
+
+    const attempt = async (token: string) =>
+      fetch(`https://api.spotify.com/v1/me/player${path}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+    try {
+      let response = await attempt(accessToken)
+
+      if (response.status === 401) {
+        const newToken = await refreshAccessToken()
+        if (!newToken) return false
+        response = await attempt(newToken)
+      }
+
+      if (response.status === 403) {
+        setError('Playback control requires Spotify Premium')
+        return false
+      }
+
+      if (response.status === 404) {
+        setError('No active Spotify device found')
+        return false
+      }
+
+      return response.ok
+    } catch {
+      setError('Failed to control playback')
+      return false
+    }
+  }, [accessToken, refreshAccessToken])
+
+  const togglePlay = useCallback(async () => {
+    if (!track) return
+    const wasPlaying = track.isPlaying
+    setTrack(t => (t ? { ...t, isPlaying: !wasPlaying } : t))
+    const ok = await controlRequest(wasPlaying ? '/pause' : '/play', 'PUT')
+    if (!ok) setTrack(t => (t ? { ...t, isPlaying: wasPlaying } : t))
+  }, [track, controlRequest])
+
+  const skipNext = useCallback(() => {
+    controlRequest('/next', 'POST')
+  }, [controlRequest])
+
+  const seek = useCallback((positionMs: number) => {
+    setTrack(t => (t ? { ...t, progressMs: positionMs } : t))
+    controlRequest(`/seek?position_ms=${Math.round(positionMs)}`, 'PUT')
+  }, [controlRequest])
+
+  const skipPrevious = useCallback(() => {
+    // Standard media-player behavior: restart the current track if it's
+    // already played past the first few seconds, only actually skip back
+    // to the previous track if it just started.
+    if (track && track.progressMs >= 5000) {
+      seek(0)
+    } else {
+      controlRequest('/previous', 'POST')
+    }
+  }, [track, seek, controlRequest])
+
   const login = useCallback(async () => {
     const verifier = generateCodeVerifier()
     codeVerifierRef.current = verifier
@@ -194,5 +262,5 @@ export function useSpotify(): SpotifyState {
     )
   }, [])
 
-  return { isAuthenticated, track, error, login }
+  return { isAuthenticated, track, error, login, togglePlay, skipNext, skipPrevious, seek }
 }

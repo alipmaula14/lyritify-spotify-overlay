@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { LyricLine } from '../hooks/useLyrics'
 import { TrackInfo } from '../hooks/useSpotify'
 
@@ -8,19 +7,13 @@ interface Props {
   isLoading: boolean
   hasLyrics: boolean
   track: TrackInfo | null
+  onSeek: (positionMs: number) => void
 }
 
-export function LyricDisplay({ lyrics, currentIndex, isLoading, hasLyrics, track }: Props) {
-  const activeRef = useRef<HTMLDivElement>(null)
+const VISIBLE = 5
+const CENTER = Math.floor(VISIBLE / 2)
 
-  // Auto scroll to current lyric line
-  useEffect(() => {
-    activeRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
-    })
-  }, [currentIndex])
-
+export function LyricDisplay({ lyrics, currentIndex, isLoading, hasLyrics, track, onSeek }: Props) {
   // No track playing
   if (!track) {
     return (
@@ -55,23 +48,25 @@ export function LyricDisplay({ lyrics, currentIndex, isLoading, hasLyrics, track
     )
   }
 
+  const startIdx = Math.max(0, Math.min(currentIndex - CENTER, lyrics.length - VISIBLE))
+  const visibleLyrics = lyrics.slice(startIdx, startIdx + VISIBLE)
+
   return (
-    <div className="lyrics-container">
-      {lyrics.map((line, index) => {
-        const isActive = index === currentIndex
-        const isPast = index < currentIndex
-        const isNext = index === currentIndex + 1
+    <div className="lyrics-window">
+      {visibleLyrics.map((line, i) => {
+        const absoluteIndex = startIdx + i
+        const isActive = absoluteIndex === currentIndex
+        const dist = Math.abs(absoluteIndex - currentIndex)
 
         return (
           <div
-            key={index}
-            ref={isActive ? activeRef : null}
+            key={absoluteIndex}
             className={[
               'lyric-line',
               isActive ? 'active' : '',
-              isPast ? 'past' : '',
-              isNext ? 'next' : ''
-            ].join(' ')}
+              dist === 1 ? 'near' : dist > 1 ? 'far' : ''
+            ].join(' ').trim()}
+            onClick={() => onSeek(line.time)}
           >
             {line.text}
           </div>

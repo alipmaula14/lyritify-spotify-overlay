@@ -5,15 +5,31 @@ import Store from 'electron-store'
 const store = new Store()
 
 const defaultSettings = {
-  windowWidth: 500,
-  windowHeight: 280,
-  fontSize: 15,
-  activeFontSize: 18,
-  fontFamily: 'Segoe UI',
-  activeColor: '#000000',
-  inactiveColor: 'rgba(0,0,0,0.35)',
-  bgColor: '#ffffff',
-  bgOpacity: 0.0
+  windowWidth: 396,
+  windowHeight: 516,
+  fontSize: 13,
+  activeFontSize: 20,
+  fontFamily: 'Inter',
+  activeColor: '#ffffff',
+  inactiveColor: 'rgba(255,255,255,0.4)',
+  bgColor: '#0c0c12',
+  bgOpacity: 0.28,
+  lyricsPanelColor: '#0c0c12',
+  lyricsPanelOpacity: 0.28,
+  lyricsCenterColor: '#1a1a2e',
+  lyricsCenterGradient: 0.4,
+  lyricsPanelRadius: 16,
+  titleColor: '#ffffff',
+  titleSize: 14,
+  artistColor: '#999999',
+  artistSize: 12,
+  buttonColor: '#cccccc',
+  buttonBgColor: '#ffffff',
+  buttonSize: 40
+}
+
+function getSettings(): typeof defaultSettings {
+  return { ...defaultSettings, ...(store.get('settings', {}) as object) }
 }
 
 let mainWindow: BrowserWindow | null = null
@@ -22,7 +38,7 @@ let settingsWindow: BrowserWindow | null = null
 let dragInterval: ReturnType<typeof setInterval> | null = null
 
 function createMainWindow(): void {
-  const settings: any = store.get('settings', defaultSettings)
+  const settings = getSettings()
 
   mainWindow = new BrowserWindow({
     width: settings.windowWidth,
@@ -49,26 +65,6 @@ function createMainWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-}
-
-function startMouseTracker(): void {
-  const { screen } = require('electron')
-  
-  setInterval(() => {
-    if (!mainWindow) return
-    const cursor = screen.getCursorScreenPoint()
-    const bounds = mainWindow.getBounds()
-    const padding = 20
-    
-    const isOver = (
-      cursor.x >= bounds.x - padding &&
-      cursor.x <= bounds.x + bounds.width + padding &&
-      cursor.y >= bounds.y - padding &&
-      cursor.y <= bounds.y + bounds.height + padding
-    )
-    
-    mainWindow.setIgnoreMouseEvents(!isOver, { forward: true })
-  }, 50)
 }
 
 function createAuthWindow(authUrl: string): void {
@@ -106,8 +102,8 @@ function createSettingsWindow(): void {
 
   settingsWindow = new BrowserWindow({
     width: 420,
-    height: 620,
-    resizable: false,
+    height: 720,
+    resizable: true,
     alwaysOnTop: true,
     title: 'Lyritify Settings',
     webPreferences: {
@@ -160,7 +156,7 @@ ipcMain.on('close-settings', () => {
 })
 
 ipcMain.handle('get-settings', () => {
-  return store.get('settings', defaultSettings)
+  return getSettings()
 })
 
 ipcMain.on('save-settings', (_event, settings: any) => {
@@ -222,7 +218,6 @@ ipcMain.on('drag-end', () => {
 
 app.whenReady().then(() => {
   createMainWindow()
-  startMouseTracker()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
   })

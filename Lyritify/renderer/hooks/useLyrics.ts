@@ -115,13 +115,35 @@ export function useLyrics(track: TrackInfo | null): LyricsState {
       })
   }, [track?.id])
 
-  // Update current lyric line based on playback progress
+  // Track playback progress isn't polled more than once a second, which makes
+  // the active line feel like it's lagging/stepping instead of tracking
+  // playback smoothly. Interpolate locally between polls using the device
+  // clock, and resync to the real value every time a fresh poll arrives.
+  const anchorRef = useRef({ ms: 0, at: 0 })
+
+  useEffect(() => {
+    if (!track) return
+    anchorRef.current = { ms: track.progressMs, at: Date.now() }
+  }, [track?.progressMs, track?.id])
+
   useEffect(() => {
     if (!track || lyrics.length === 0) return
 
-    const index = findCurrentIndex(lyrics, track.progressMs)
-    setCurrentIndex(index)
-  }, [track?.progressMs, lyrics])
+    if (!track.isPlaying) {
+      setCurrentIndex(findCurrentIndex(lyrics, anchorRef.current.ms))
+      return
+    }
+
+    const tick = () => {
+      const elapsed = Date.now() - anchorRef.current.at
+      const interpolatedMs = Math.min(track.durationMs, anchorRef.current.ms + elapsed)
+      setCurrentIndex(findCurrentIndex(lyrics, interpolatedMs))
+    }
+
+    tick()
+    const interval = setInterval(tick, 50)
+    return () => clearInterval(interval)
+  }, [track, lyrics])
 
   return {
     lyrics,
